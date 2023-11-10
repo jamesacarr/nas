@@ -1,0 +1,198 @@
+name: media-services
+
+services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    depends_on:
+      - radarr
+      - sonarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:6767/bazarr/ping" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '16767:6767'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Bazarr/config:/config
+      - /share/Data:/data
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:9117/health" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '19117:9117'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Jackett/config:/config
+      - /share/Download/Jackett:/downlaods
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    depends_on:
+      - radarr
+      - sonarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:5055/api/v1/status" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '15055:5055'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Overseerr/config:/config
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+      - WEBUI_PORT=18181
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:18181" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '18181:18181'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/qBittorrent/config:/config
+      - /share/Data:/data
+      - /usr/builtin/etc/certificate:/sslcerts
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    depends_on:
+      - qbittorrent
+      - jackett
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:7878/radarr/ping" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '17878:7878'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Radarr/config:/config
+      - /share/Data:/data
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    depends_on:
+      - qbittorrent
+      - jackett
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8989/sonarr/ping" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '18989:8989'
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Sonarr/config:/config
+      - /share/Data:/data
+
+  tautulli:
+    image: ghcr.io/tautulli/tautulli:latest
+    container_name: tautulli
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8181/status" ]
+      interval: 5s
+      retries: 10
+    ports:
+      - 28181:8181
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Tautulli/config:/config
+      - /share/Docker/Tautulli/plexlogs:/logs
+
+  unpackerr:
+    image: golift/unpackerr:latest
+    container_name: unpackerr
+    depends_on:
+      - radarr
+      - sonarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+      # Sonarr Settings
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_SONARR_0_API_KEY=${SONARR_API_KEY}
+      # Radarr Settings
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_RADARR_0_API_KEY=${RADARR_API_KEY}
+    networks:
+      - media-net
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Data:/data
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    environment:
+      - TZ=${TIMEZONE}
+      - WATCHTOWER_CLEANUP=true
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  media-net:
+    driver: bridge
