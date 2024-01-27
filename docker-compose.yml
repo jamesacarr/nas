@@ -19,7 +19,7 @@ services:
       - media-net
     ports:
       - '16767:6767'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Bazarr/config:/config
@@ -40,7 +40,7 @@ services:
       - media-net
     ports:
       - '19117:9117'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Jackett/config:/config
@@ -64,7 +64,7 @@ services:
       - media-net
     ports:
       - '15055:5055'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Overseerr/config:/config
@@ -85,7 +85,7 @@ services:
       - media-net
     ports:
       - '18181:18181'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/qBittorrent/config:/config
@@ -110,7 +110,7 @@ services:
       - media-net
     ports:
       - '17878:7878'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Radarr/config:/config
@@ -134,7 +134,7 @@ services:
       - media-net
     ports:
       - '18989:8989'
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Sonarr/config:/config
@@ -153,7 +153,7 @@ services:
       retries: 10
     ports:
       - 28181:8181
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Tautulli/config:/config
@@ -177,7 +177,7 @@ services:
       - UN_RADARR_0_API_KEY=${RADARR_API_KEY}
     networks:
       - media-net
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Data:/data
@@ -188,7 +188,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
       - WATCHTOWER_CLEANUP=true
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /var/run/docker.sock:/var/run/docker.sock
