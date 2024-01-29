@@ -79,6 +79,37 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Overseerr/config:/config
 
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+      - VERSION=docker
+    labels:
+      - traefik.enable=true
+      ## HTTP Routers
+      - traefik.http.routers.plex-rtr.entrypoints=https
+      - traefik.http.routers.plex-rtr.rule=Host(`plex.jamescarr.dev`)
+      - traefik.http.routers.plex-rtr.tls=true
+      - traefik.http.routers.plex-rtr.tls.certresolver=myresolver
+      ## HTTP Services
+      - traefik.http.routers.plex-rtr.service=plex-svc
+      - traefik.http.services.plex-svc.loadbalancer.server.port=32400
+    networks:
+      - media-net
+    ports:
+      - 32400:32400
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Plex/config:/config
+      - /share/Data/Media/Movies:/movies
+      - /share/Data/Media/TV:/tv
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -161,6 +192,8 @@ services:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8181/status" ]
       interval: 5s
       retries: 10
+    networks:
+      - media-net
     ports:
       - 28181:8181
     restart: always
