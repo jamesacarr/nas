@@ -60,6 +60,16 @@ services:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:5055/api/v1/status" ]
       interval: 5s
       retries: 10
+    labels:
+      - traefik.enable=true
+      ## HTTP Routers
+      - traefik.http.routers.overseerr-rtr.entrypoints=https
+      - traefik.http.routers.overseerr-rtr.rule=Host(`overseerr.jamescarr.dev`)
+      - traefik.http.routers.overseerr-rtr.tls=true
+      - traefik.http.routers.overseerr-rtr.tls.certresolver=myresolver
+      ## HTTP Services
+      - traefik.http.routers.overseerr-rtr.service=overseerr-svc
+      - traefik.http.services.overseerr-svc.loadbalancer.server.port=5055
     networks:
       - media-net
     ports:
@@ -158,6 +168,38 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Tautulli/config:/config
       - /share/Docker/Tautulli/plexlogs:/logs
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      - --api.insecure=true
+      - --ping=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.myresolver.acme.dnschallenge=true
+      - --certificatesresolvers.myresolver.acme.dnschallenge.provider=vercel
+      - --certificatesresolvers.myresolver.acme.email=james@jamescarr.dev
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    environment:
+      - TZ=${TIMEZONE}
+      - VERCEL_API_TOKEN=${VERCEL_API_TOKEN}
+    healthcheck:
+      test: [ "CMD", "traefik", "healthcheck", "--ping" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - '8080:8080'
+      - '1443:443'
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Traefik/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
 
   unpackerr:
     image: golift/unpackerr:latest
