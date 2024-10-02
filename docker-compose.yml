@@ -111,6 +111,10 @@ services:
       - PGID=${GROUP_ID}
       - TZ=${TIMEZONE}
       - VERSION=docker
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:32400/identity" ]
+      interval: 5s
+      retries: 10
     labels:
       - traefik.enable=true
       ## HTTP Routers
