@@ -298,6 +298,11 @@ services:
       # Radarr Settings
       - UN_RADARR_0_URL=http://radarr:7878
       - UN_RADARR_0_API_KEY=${RADARR_API_KEY}
+      # Webhook/Notifiarr Settings
+      - UN_WEBHOOK_0_URL=https://notifiarr.com/api/v1/notification/unpackerr/619c68f2-65a7-4485-bb71-95d8d72d0833
+      - UN_WEBHOOK_0_NAME=Notifiarr
+      - UN_WEBHOOK_0_SILENT=false
+      - UN_WEBHOOK_0_EVENTS=0
     networks:
       - media-net
     restart: always
