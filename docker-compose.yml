@@ -25,6 +25,29 @@ services:
       - /share/Docker/Bazarr/config:/config
       - /share/Data:/data
 
+  notifiarr:
+    image: golift/notifiarr
+    hostname: notifiarr
+    container_name: notifiarr
+    depends_on:
+      - bazarr
+      - radarr
+      - sonarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    networks:
+      - media-net
+    ports:
+      - '15454:5454'
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Notifiarr/config:/config
+      - /var/run/utmp:/var/run/utmp
+      - /etc/machine-id:/etc/machine-id
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -258,7 +281,6 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Traefik/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    
 
   unpackerr:
     image: golift/unpackerr:latest
