@@ -18,35 +18,12 @@ services:
     networks:
       - media-net
     ports:
-      - '16767:6767'
+      - 16767:6767
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Bazarr/config:/config
       - /share/Data:/data
-
-  notifiarr:
-    image: golift/notifiarr
-    hostname: notifiarr
-    container_name: notifiarr
-    depends_on:
-      - bazarr
-      - radarr
-      - sonarr
-    environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
-    networks:
-      - media-net
-    ports:
-      - '15454:5454'
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - /share/Docker/Notifiarr/config:/config
-      - /var/run/utmp:/var/run/utmp
-      - /etc/machine-id:/etc/machine-id
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
@@ -65,7 +42,7 @@ services:
     networks:
       - media-net
     ports:
-      - '18191:8191'
+      - 18191:8191
     restart: always
 
   jackett:
@@ -84,12 +61,35 @@ services:
     networks:
       - media-net
     ports:
-      - '19117:9117'
+      - 19117:9117
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Jackett/config:/config
       - /share/Download/Jackett:/downlaods
+
+  notifiarr:
+    image: golift/notifiarr
+    hostname: notifiarr
+    container_name: notifiarr
+    depends_on:
+      - bazarr
+      - radarr
+      - sonarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    networks:
+      - media-net
+    ports:
+      - 15454:5454
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Notifiarr/config:/config
+      - /var/run/utmp:/var/run/utmp
+      - /etc/machine-id:/etc/machine-id
 
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -118,7 +118,7 @@ services:
     networks:
       - media-net
     ports:
-      - '15055:5055'
+      - 15055:5055
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
@@ -159,6 +159,26 @@ services:
       - /share/Data/Media/Movies:/movies
       - /share/Data/Media/TV:/tv
 
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:9696/ping" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    ports:
+      - 19696:9696
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Prowlarr/config:/config
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -174,7 +194,7 @@ services:
     networks:
       - media-net
     ports:
-      - '18181:18181'
+      - 18181:18181
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
@@ -186,8 +206,9 @@ services:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     depends_on:
-      - qbittorrent
       - jackett
+      - prowlarr
+      - qbittorrent
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
@@ -199,7 +220,7 @@ services:
     networks:
       - media-net
     ports:
-      - '17878:7878'
+      - 17878:7878
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
@@ -210,8 +231,9 @@ services:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     depends_on:
-      - qbittorrent
       - jackett
+      - prowlarr
+      - qbittorrent
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
@@ -223,7 +245,7 @@ services:
     networks:
       - media-net
     ports:
-      - '18989:8989'
+      - 18989:8989
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
@@ -274,8 +296,8 @@ services:
     networks:
       - media-net
     ports:
-      - '8080:8080'
-      - '1443:443'
+      - 8080:8080
+      - 1443:443
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
