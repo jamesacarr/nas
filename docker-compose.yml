@@ -19,11 +19,29 @@ services:
       - media-net
     ports:
       - 16767:6767
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Bazarr/config:/config
       - /share/Data:/data
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    hostname: cloudflare-tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+      - TZ=${TIMEZONE}
+    healthcheck:
+      test: [ "CMD", "cloudflared", "--version" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
 
   notifiarr:
     image: golift/notifiarr
@@ -41,7 +59,7 @@ services:
       - media-net
     ports:
       - 15454:5454
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Notifiarr/config:/config
@@ -65,18 +83,18 @@ services:
     labels:
       - traefik.enable=true
       ## HTTP Routers
-      - traefik.http.routers.overseerr-rtr.entrypoints=https
+      - traefik.http.routers.overseerr-rtr.entrypoints=websecure
       - traefik.http.routers.overseerr-rtr.rule=Host(`overseerr.jamescarr.dev`)
+      - traefik.http.routers.overseerr-rtr.service=overseerr-svc
       - traefik.http.routers.overseerr-rtr.tls=true
       - traefik.http.routers.overseerr-rtr.tls.certresolver=myresolver
       ## HTTP Services
-      - traefik.http.routers.overseerr-rtr.service=overseerr-svc
       - traefik.http.services.overseerr-svc.loadbalancer.server.port=5055
     networks:
       - media-net
     ports:
       - 15055:5055
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Overseerr/config:/config
@@ -98,18 +116,18 @@ services:
     labels:
       - traefik.enable=true
       ## HTTP Routers
-      - traefik.http.routers.plex-rtr.entrypoints=https
+      - traefik.http.routers.plex-rtr.entrypoints=websecure
       - traefik.http.routers.plex-rtr.rule=Host(`plex.jamescarr.dev`)
+      - traefik.http.routers.plex-rtr.service=plex-svc
       - traefik.http.routers.plex-rtr.tls=true
       - traefik.http.routers.plex-rtr.tls.certresolver=myresolver
       ## HTTP Services
-      - traefik.http.routers.plex-rtr.service=plex-svc
       - traefik.http.services.plex-svc.loadbalancer.server.port=32400
     networks:
       - media-net
     ports:
       - 32400:32400
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Plex/config:/config
@@ -131,7 +149,7 @@ services:
       - media-net
     ports:
       - 19696:9696
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Prowlarr/config:/config
@@ -152,7 +170,7 @@ services:
       - media-net
     ports:
       - 18181:18181
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/qBittorrent/config:/config
@@ -177,7 +195,7 @@ services:
       - media-net
     ports:
       - 17878:7878
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Radarr/config:/config
@@ -201,7 +219,7 @@ services:
       - media-net
     ports:
       - 18989:8989
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Sonarr/config:/config
@@ -222,7 +240,7 @@ services:
       - media-net
     ports:
       - 28181:8181
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Tautulli/config:/config
@@ -236,7 +254,10 @@ services:
       - --ping=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --entrypoints.https.address=:443
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --certificatesresolvers.myresolver.acme.dnschallenge=true
       - --certificatesresolvers.myresolver.acme.dnschallenge.provider=vercel
       - --certificatesresolvers.myresolver.acme.email=james@jamescarr.dev
@@ -253,7 +274,7 @@ services:
     ports:
       - 8080:8080
       - 1443:443
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Traefik/letsencrypt:/letsencrypt
@@ -282,7 +303,7 @@ services:
       - UN_WEBHOOK_0_EVENTS=0
     networks:
       - media-net
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Data:/data
@@ -293,7 +314,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
       - WATCHTOWER_CLEANUP=true
-    restart: always
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
       - /var/run/docker.sock:/var/run/docker.sock
