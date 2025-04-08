@@ -43,6 +43,20 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
 
+  dockerproxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: dockerproxy
+    environment:
+      CONTAINERS: 1 # Allow access to viewing containers
+      POST: 0 # Disallow any POST operations (effectively read-only)
+    networks:
+      - media-net
+    ports:
+      - 2375:2375
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   notifiarr:
     image: golift/notifiarr
     hostname: notifiarr
