@@ -27,9 +27,7 @@ services:
       - homepage.widget.key=$BAZARR_API_KEY
     networks:
       - media-net
-    ports:
-      - 16767:6767
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Bazarr/config:/config
@@ -60,21 +58,23 @@ services:
       - homepage.widget.key=$CLOUDFLARE_TUNNEL_API_TOKEN
     networks:
       - media-net
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
 
   dockerproxy:
-    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    image: lscr.io/linuxserver/socket-proxy:latest
     container_name: dockerproxy
     environment:
       CONTAINERS: 1 # Allow access to viewing containers
       POST: 0 # Disallow any POST operations (effectively read-only)
+      VERSION: 1
     networks:
-      - media-net
-    ports:
-      - 2375:2375
-    restart: unless-stopped
+      - socket-proxy
+    read_only: true
+    restart: always
+    tmpfs:
+      - /run
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -88,9 +88,8 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: jamescarr.stream
     networks:
       - media-net
-    ports:
-      - 3000:3000
-    restart: unless-stopped
+      - socket-proxy
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Homepage/config:/app/config
@@ -117,9 +116,7 @@ services:
       - homepage.weight=1
     networks:
       - media-net
-    ports:
-      - 15454:5454
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Notifiarr/config:/config
@@ -152,9 +149,7 @@ services:
       - homepage.widget.key=$OVERSEERR_API_KEY
     networks:
       - media-net
-    ports:
-      - 15055:5055
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Overseerr/config:/config
@@ -188,7 +183,7 @@ services:
       - media-net
     ports:
       - 32400:32400
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Plex/config:/config
@@ -218,9 +213,7 @@ services:
       - homepage.widget.key=$PROWLARR_API_KEY
     networks:
       - media-net
-    ports:
-      - 19696:9696
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Prowlarr/config:/config
@@ -250,9 +243,7 @@ services:
       - homepage.widget.password=$QBITTORRENT_PASSWORD
     networks:
       - media-net
-    ports:
-      - 18181:18181
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/qBittorrent/config:/config
@@ -285,9 +276,7 @@ services:
       - homepage.widget.key=$RADARR_API_KEY
     networks:
       - media-net
-    ports:
-      - 17878:7878
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Radarr/config:/config
@@ -319,9 +308,7 @@ services:
       - homepage.widget.key=$SONARR_API_KEY
     networks:
       - media-net
-    ports:
-      - 18989:8989
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Sonarr/config:/config
@@ -352,9 +339,7 @@ services:
       - homepage.widget.showEpisodeNumber=true
     networks:
       - media-net
-    ports:
-      - 28181:8181
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Tautulli/config:/config
@@ -383,7 +368,7 @@ services:
       UN_WEBHOOK_0_EVENTS: 0
     networks:
       - media-net
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /share/Data:/data
@@ -407,13 +392,13 @@ services:
       - homepage.widget.key=$WATCHTOWER_API_TOKEN
     networks:
       - media-net
-    ports:
-      - 18080:8080
-    restart: unless-stopped
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime
       - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   media-net:
+    driver: bridge
+  socket-proxy:
     driver: bridge
