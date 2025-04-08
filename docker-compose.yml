@@ -8,13 +8,23 @@ services:
       - radarr
       - sonarr
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:6767/bazarr/ping" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Bazarr
+      - homepage.icon=bazarr.png
+      - homepage.href=https://bazarr.jamescarr.stream/
+      - homepage.description=Subtitle manager
+      - homepage.group=Media
+      - homepage.weight=13
+      - homepage.widget.type=bazarr
+      - homepage.widget.url=http://bazarr:6767
+      - homepage.widget.key=$BAZARR_API_KEY
     networks:
       - media-net
     ports:
@@ -31,12 +41,23 @@ services:
     hostname: cloudflare-tunnel
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-      - TZ=${TIMEZONE}
+      TZ: $TIMEZONE
+      TUNNEL_TOKEN: $CLOUDFLARE_TUNNEL_TOKEN
     healthcheck:
       test: [ "CMD", "cloudflared", "--version" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Cloudflare Tunnel
+      - homepage.icon=cloudflare.png
+      - homepage.href=https://one.dash.cloudflare.com/
+      - homepage.description=External access
+      - homepage.group=Utils
+      - homepage.weight=2
+      - homepage.widget.type=cloudflared
+      - homepage.widget.accountid=$CLOUDFLARE_ACCOUNT_ID
+      - homepage.widget.tunnelid=$CLOUDFLARE_TUNNEL_ID
+      - homepage.widget.key=$CLOUDFLARE_TUNNEL_API_TOKEN
     networks:
       - media-net
     restart: unless-stopped
@@ -57,6 +78,24 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+      HOMEPAGE_ALLOWED_HOSTS: jamescarr.stream
+    networks:
+      - media-net
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+
   notifiarr:
     image: golift/notifiarr
     hostname: notifiarr
@@ -66,9 +105,16 @@ services:
       - radarr
       - sonarr
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+    labels:
+      - homepage.name=Notifiarr
+      - homepage.icon=notifiarr.png
+      - homepage.href=https://notifiarr.com/user.php?page=integrations
+      - homepage.description=Notification manager
+      - homepage.group=Utils
+      - homepage.weight=1
     networks:
       - media-net
     ports:
@@ -87,13 +133,23 @@ services:
       - radarr
       - sonarr
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:5055/api/v1/status" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Overseerr
+      - homepage.icon=overseerr.png
+      - homepage.href=https://overseerr.jamescarr.stream/
+      - homepage.description=Request manager
+      - homepage.group=Media
+      - homepage.weight=3
+      - homepage.widget.type=overseerr
+      - homepage.widget.url=https://overseerr.jamescarr.stream/
+      - homepage.widget.key=$OVERSEERR_API_KEY
     networks:
       - media-net
     ports:
@@ -109,14 +165,25 @@ services:
     devices:
       - /dev/dri:/dev/dri
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
-      - VERSION=docker
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+      VERSION: docker
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:32400/identity" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Plex
+      - homepage.icon=plex.png
+      - homepage.href=https://plex.jamescarr.stream/
+      - homepage.description=Media server
+      - homepage.group=Media
+      - homepage.weight=1
+      - homepage.widget.type=plex
+      - homepage.widget.url=https://plex.jamescarr.stream/
+      - homepage.widget.key=$PLEX_TOKEN
+      - homepage.widget.fields=["streams", "movies", "tv"]
     networks:
       - media-net
     ports:
@@ -132,13 +199,23 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:9696/ping" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Prowlarr
+      - homepage.icon=prowlarr.png
+      - homepage.href=https://prowlarr.jamescarr.stream/
+      - homepage.description=Indexer manager
+      - homepage.group=Downloads
+      - homepage.weight=9
+      - homepage.widget.type=prowlarr
+      - homepage.widget.url=http://prowlarr:9696
+      - homepage.widget.key=$PROWLARR_API_KEY
     networks:
       - media-net
     ports:
@@ -152,14 +229,25 @@ services:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
-      - WEBUI_PORT=18181
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+      WEBUI_PORT: 18181
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:18181" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=qBittorrent
+      - homepage.icon=qbittorrent.png
+      - homepage.href=https://qbittorrent.jamescarr.stream/
+      - homepage.description=Torrent client
+      - homepage.group=Downloads
+      - homepage.weight=1
+      - homepage.widget.type=qbittorrent
+      - homepage.widget.url=http://qbittorrent:18181
+      - homepage.widget.username=$QBITTORRENT_USERNAME
+      - homepage.widget.password=$QBITTORRENT_PASSWORD
     networks:
       - media-net
     ports:
@@ -178,13 +266,23 @@ services:
       - prowlarr
       - qbittorrent
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:7878/radarr/ping" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Radarr
+      - homepage.icon=radarr.png
+      - homepage.href=https://radarr.jamescarr.stream/
+      - homepage.description=Movie manager
+      - homepage.group=Media
+      - homepage.weight=11
+      - homepage.widget.type=radarr
+      - homepage.widget.url=http://radarr:7878
+      - homepage.widget.key=$RADARR_API_KEY
     networks:
       - media-net
     ports:
@@ -202,13 +300,23 @@ services:
       - prowlarr
       - qbittorrent
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8989/sonarr/ping" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Sonarr
+      - homepage.icon=sonarr.png
+      - homepage.href=https://sonarr.jamescarr.stream/
+      - homepage.description=Series manager
+      - homepage.group=Media
+      - homepage.weight=12
+      - homepage.widget.type=sonarr
+      - homepage.widget.url=http://sonarr:8989
+      - homepage.widget.key=$SONARR_API_KEY
     networks:
       - media-net
     ports:
@@ -223,13 +331,25 @@ services:
     image: ghcr.io/tautulli/tautulli:latest
     container_name: tautulli
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8181/status" ]
       interval: 5s
       retries: 10
+    labels:
+      - homepage.name=Tautulli
+      - homepage.icon=tautulli.png
+      - homepage.href=https://tautulli.jamescarr.stream/
+      - homepage.description=Media server stats
+      - homepage.group=Media
+      - homepage.weight=2
+      - homepage.widget.type=tautulli
+      - homepage.widget.url=http://tautulli:8181
+      - homepage.widget.key=$TAUTULLI_API_KEY
+      - homepage.widget.enableUser=true
+      - homepage.widget.showEpisodeNumber=true
     networks:
       - media-net
     ports:
@@ -247,20 +367,20 @@ services:
       - radarr
       - sonarr
     environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
       # Sonarr Settings
-      - UN_SONARR_0_URL=http://sonarr:8989
-      - UN_SONARR_0_API_KEY=${SONARR_API_KEY}
+      UN_SONARR_0_URL: http://sonarr:8989
+      UN_SONARR_0_API_KEY: $SONARR_API_KEY
       # Radarr Settings
-      - UN_RADARR_0_URL=http://radarr:7878
-      - UN_RADARR_0_API_KEY=${RADARR_API_KEY}
+      UN_RADARR_0_URL: http://radarr:7878
+      UN_RADARR_0_API_KEY: $RADARR_API_KEY
       # Webhook/Notifiarr Settings
-      - UN_WEBHOOK_0_URL=https://notifiarr.com/api/v1/notification/unpackerr/619c68f2-65a7-4485-bb71-95d8d72d0833
-      - UN_WEBHOOK_0_NAME=Notifiarr
-      - UN_WEBHOOK_0_SILENT=false
-      - UN_WEBHOOK_0_EVENTS=0
+      UN_WEBHOOK_0_URL: https://notifiarr.com/api/v1/notification/unpackerr/619c68f2-65a7-4485-bb71-95d8d72d0833
+      UN_WEBHOOK_0_NAME: Notifiarr
+      UN_WEBHOOK_0_SILENT: false
+      UN_WEBHOOK_0_EVENTS: 0
     networks:
       - media-net
     restart: unless-stopped
@@ -272,8 +392,23 @@ services:
     image: containrrr/watchtower:latest
     container_name: watchtower
     environment:
-      - TZ=${TIMEZONE}
-      - WATCHTOWER_CLEANUP=true
+      TZ: $TIMEZONE
+      WATCHTOWER_HTTP_API_METRICS: true
+      WATCHTOWER_HTTP_API_TOKEN: $WATCHTOWER_API_TOKEN
+      WATCHTOWER_CLEANUP: true
+    labels:
+      - homepage.name=Watchtower
+      - homepage.icon=watchtower.png
+      - homepage.description=Container monitoring
+      - homepage.group=Utils
+      - homepage.weight=3
+      - homepage.widget.type=watchtower
+      - homepage.widget.url=http://watchtower:8080
+      - homepage.widget.key=$WATCHTOWER_API_TOKEN
+    networks:
+      - media-net
+    ports:
+      - 18080:8080
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
