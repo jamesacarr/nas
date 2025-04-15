@@ -51,7 +51,7 @@ services:
       - homepage.href=https://one.dash.cloudflare.com/
       - homepage.description=External access
       - homepage.group=Utils
-      - homepage.weight=2
+      - homepage.weight=3
       - homepage.widget.type=cloudflared
       - homepage.widget.accountid=$CLOUDFLARE_ACCOUNT_ID
       - homepage.widget.tunnelid=$CLOUDFLARE_TUNNEL_ID
@@ -95,6 +95,38 @@ services:
       - /share/Docker/Homepage/config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock
 
+  maintainerr:
+    image: ghcr.io/jorenn92/maintainerr:latest
+    container_name: maintainerr
+    depends_on:
+      - overseerr
+      - plex
+      - radarr
+      - sonarr
+    environment:
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:6246/api/app/status" ]
+      interval: 5s
+      retries: 10
+    labels:
+      - homepage.name=Maintainerr
+      - homepage.icon=sh-maintainerr
+      - homepage.href=https://maintainerr.jamescarr.stream/
+      - homepage.description=Media maintenance
+      - homepage.group=Utils
+      - homepage.weight=1
+    networks:
+      - media-net
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Maintainerr/config:/config
+      - /share/Data:/data
+
+
   notifiarr:
     image: golift/notifiarr
     hostname: notifiarr
@@ -113,7 +145,7 @@ services:
       - homepage.href=https://notifiarr.com/user.php?page=integrations
       - homepage.description=Notification manager
       - homepage.group=Utils
-      - homepage.weight=1
+      - homepage.weight=2
     networks:
       - media-net
     restart: always
@@ -386,7 +418,7 @@ services:
       - homepage.icon=watchtower.png
       - homepage.description=Container monitoring
       - homepage.group=Utils
-      - homepage.weight=3
+      - homepage.weight=4
       - homepage.widget.type=watchtower
       - homepage.widget.url=http://watchtower:8080
       - homepage.widget.key=$WATCHTOWER_API_TOKEN
