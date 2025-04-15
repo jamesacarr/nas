@@ -1,7 +1,7 @@
 name: media-services
 
 services:
-  bazarr:
+  bazarr: # Port 6767
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
     depends_on:
@@ -78,7 +78,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  homepage:
+  homepage: # Port 3000
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     environment:
@@ -95,7 +95,7 @@ services:
       - /share/Docker/Homepage/config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock
 
-  maintainerr:
+  maintainerr: # Port 6246
     image: ghcr.io/jorenn92/maintainerr:latest
     container_name: maintainerr
     depends_on:
@@ -126,8 +126,7 @@ services:
       - /share/Docker/Maintainerr/config:/config
       - /share/Data:/data
 
-
-  notifiarr:
+  notifiarr: # Port 5454
     image: golift/notifiarr
     hostname: notifiarr
     container_name: notifiarr
@@ -155,7 +154,7 @@ services:
       - /var/run/utmp:/var/run/utmp
       - /etc/machine-id:/etc/machine-id
 
-  overseerr:
+  overseerr: # Port 5055
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     depends_on:
@@ -186,7 +185,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Overseerr/config:/config
 
-  plex:
+  plex: # Port 32400
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
     devices:
@@ -222,7 +221,7 @@ services:
       - /share/Data/Media/Movies:/movies
       - /share/Data/Media/TV:/tv
 
-  prowlarr:
+  prowlarr: # Port 9696
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
@@ -250,7 +249,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Prowlarr/config:/config
 
-  qbittorrent:
+  qbittorrent: # Port 18181
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
@@ -282,7 +281,7 @@ services:
       - /share/Data:/data
       - /usr/builtin/etc/certificate:/sslcerts
 
-  radarr:
+  radarr: # Port 7878
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     depends_on:
@@ -314,7 +313,7 @@ services:
       - /share/Docker/Radarr/config:/config
       - /share/Data:/data
 
-  sonarr:
+  sonarr: # Port 8989
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     depends_on:
@@ -346,7 +345,7 @@ services:
       - /share/Docker/Sonarr/config:/config
       - /share/Data:/data
 
-  tautulli:
+  tautulli: # Port 8181
     image: ghcr.io/tautulli/tautulli:latest
     container_name: tautulli
     environment:
