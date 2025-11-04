@@ -96,7 +96,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   maintainerr: # Port 6246
-    image: ghcr.io/jorenn92/maintainerr:latest
+    image: ghcr.io/maintainerr/maintainerr:latest
     container_name: maintainerr
     depends_on:
       - overseerr
@@ -104,8 +104,6 @@ services:
       - radarr
       - sonarr
     environment:
-      PUID: $USER_ID
-      PGID: $GROUP_ID
       TZ: $TIMEZONE
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:6246/api/app/status" ]
@@ -121,10 +119,10 @@ services:
     networks:
       - media-net
     restart: always
+    user: $USER_ID:$GROUP_ID
     volumes:
       - /etc/localtime:/etc/localtime
-      - /share/Docker/Maintainerr/config:/config
-      - /share/Data:/data
+      - /share/Docker/Maintainerr/data:/opt/data
 
   notifiarr: # Port 5454
     image: golift/notifiarr
