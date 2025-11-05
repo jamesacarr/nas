@@ -305,6 +305,8 @@ services:
       - homepage.widget.key=$RADARR_API_KEY
     networks:
       - media-net
+    ports:
+      - 17878:7878
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
@@ -337,6 +339,8 @@ services:
       - homepage.widget.key=$SONARR_API_KEY
     networks:
       - media-net
+    ports:
+      - 18989:8989
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime
