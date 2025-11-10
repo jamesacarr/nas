@@ -343,6 +343,26 @@ services:
       - /share/Docker/Sonarr/config:/config
       - /share/Data:/data
 
+  tagarr: # Port 3000
+    image: ghcr.io/jamesacarr/tagarr:latest
+    container_name: tagarr
+    depends_on:
+      - radarr
+      - sonarr
+    labels:
+      - homepage.name=Tagarr
+      - homepage.icon=sh-google-tag-manager
+      - homepage.href=https://tagarr.jamescarr.stream/
+      - homepage.description=Tagging manager
+      - homepage.group=Media
+      - homepage.weight=14
+    networks:
+      - media-net
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Tagarr/data:/data
+
   tautulli: # Port 8181
     image: ghcr.io/tautulli/tautulli:latest
     container_name: tautulli
