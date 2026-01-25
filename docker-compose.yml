@@ -152,6 +152,22 @@ services:
       - /var/run/utmp:/var/run/utmp
       - /etc/machine-id:/etc/machine-id
 
+  opdshelf: # Port 3000
+    image: koalilla/opds-server:latest
+    container_name: opdshelf
+    environment:
+      TZ: $TIMEZONE
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/simple" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Data/Media/Books:/app/books
+
   overseerr: # Port 5055
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
