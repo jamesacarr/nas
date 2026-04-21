@@ -78,6 +78,33 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  homebot:
+    image: ghcr.io/jamesacarr/homebot:latest
+    container_name: homebot
+    depends_on:
+      - overseerr
+    environment:
+      ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
+      LLM_PROVIDER: anthropic
+      LLM_MODEL: claude-haiku-4-5
+      NODE_OPTIONS: --dns-result-order=ipv4first --no-network-family-autoselection
+      OVERSEERR_API_KEY: $OVERSEERR_API_KEY
+      OVERSEERR_URL: http://overseerr:5055
+      TELEGRAM_BOT_TOKEN: $TELEGRAM_BOT_TOKEN
+      TELEGRAM_OWNER_ID: $TELEGRAM_OWNER_ID
+      TZ: $TIMEZONE
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:3000/health" ]
+      interval: 5s
+      retries: 10
+    networks:
+      - media-net
+    restart: always
+    user: $USER_ID:$GROUP_ID
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Homebot/data:/data
+
   homepage: # Port 3000
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
