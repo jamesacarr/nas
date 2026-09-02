@@ -82,14 +82,14 @@ services:
     image: ghcr.io/jamesacarr/homebot:latest
     container_name: homebot
     depends_on:
-      - overseerr
+      - seerr
     environment:
       ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
       LLM_PROVIDER: anthropic
       LLM_MODEL: claude-haiku-4-5
       NODE_OPTIONS: --dns-result-order=ipv4first --no-network-family-autoselection
-      OVERSEERR_API_KEY: $OVERSEERR_API_KEY
-      OVERSEERR_URL: http://overseerr:5055
+      OVERSEERR_API_KEY: $SEERR_API_KEY
+      OVERSEERR_URL: http://seerr:5055
       TELEGRAM_BOT_TOKEN: $TELEGRAM_BOT_TOKEN
       TELEGRAM_OWNER_ID: $TELEGRAM_OWNER_ID
       TZ: $TIMEZONE
@@ -126,7 +126,7 @@ services:
     image: ghcr.io/maintainerr/maintainerr:latest
     container_name: maintainerr
     depends_on:
-      - overseerr
+      - seerr
       - plex
       - radarr
       - sonarr
@@ -178,37 +178,6 @@ services:
       - /share/Docker/Notifiarr/config:/config
       - /var/run/utmp:/var/run/utmp
       - /etc/machine-id:/etc/machine-id
-
-  overseerr: # Port 5055
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
-    depends_on:
-      - radarr
-      - sonarr
-    environment:
-      PUID: $USER_ID
-      PGID: $GROUP_ID
-      TZ: $TIMEZONE
-    healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:5055/api/v1/status" ]
-      interval: 5s
-      retries: 10
-    labels:
-      - homepage.name=Overseerr
-      - homepage.icon=overseerr.png
-      - homepage.href=https://overseerr.jamescarr.stream/
-      - homepage.description=Request manager
-      - homepage.group=Media
-      - homepage.weight=3
-      - homepage.widget.type=overseerr
-      - homepage.widget.url=https://overseerr.jamescarr.stream/
-      - homepage.widget.key=$OVERSEERR_API_KEY
-    networks:
-      - media-net
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - /share/Docker/Overseerr/config:/config
 
   plex: # Port 32400
     image: lscr.io/linuxserver/plex:latest
@@ -339,6 +308,38 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Docker/Radarr/config:/config
       - /share/Data:/data
+
+  seerr: # Port 5055
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
+    depends_on:
+      - radarr
+      - sonarr
+    environment:
+      PUID: $USER_ID
+      PGID: $GROUP_ID
+      TZ: $TIMEZONE
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      interval: 5s
+      retries: 10
+    labels:
+      - homepage.name=Seerr
+      - homepage.icon=seerr.png
+      - homepage.href=https://seerr.jamescarr.stream/
+      - homepage.description=Request manager
+      - homepage.group=Media
+      - homepage.weight=3
+      - homepage.widget.type=seerr
+      - homepage.widget.url=https://seerr.jamescarr.stream/
+      - homepage.widget.key=$SEERR_API_KEY
+    networks:
+      - media-net
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /share/Docker/Seerr/config:/app/config
 
   sonarr: # Port 8989
     image: lscr.io/linuxserver/sonarr:latest
