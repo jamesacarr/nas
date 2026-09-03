@@ -454,32 +454,6 @@ services:
       - /etc/localtime:/etc/localtime
       - /share/Data:/data
 
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    environment:
-      TZ: $TIMEZONE
-      WATCHTOWER_CLEANUP: true
-      WATCHTOWER_HTTP_API_METRICS: true
-      WATCHTOWER_HTTP_API_TOKEN: $WATCHTOWER_API_TOKEN
-      WATCHTOWER_NOTIFICATION_REPORT: true
-      WATCHTOWER_NOTIFICATION_URL: generic://notifiarr.com/api/v1/notification/watchtower/$NOTIFIARR_WATCHTOWER_API_KEY?template=json
-    labels:
-      - homepage.name=Watchtower
-      - homepage.icon=watchtower.png
-      - homepage.description=Container monitoring
-      - homepage.group=Utils
-      - homepage.weight=4
-      - homepage.widget.type=watchtower
-      - homepage.widget.url=http://watchtower:8080
-      - homepage.widget.key=$WATCHTOWER_API_TOKEN
-    networks:
-      - media-net
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - /var/run/docker.sock:/var/run/docker.sock
-
 networks:
   media-net:
     driver: bridge
